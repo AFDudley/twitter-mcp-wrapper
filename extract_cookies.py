@@ -1,23 +1,27 @@
 #!/usr/bin/env python3
-import json
+"""Extract Twitter cookies from Brave browser."""
+import sys
 import browser_cookie3
 
 
 def get_twitter_cookies():
+    """Extract ct0 and auth_token cookies from Brave browser."""
     cj = browser_cookie3.brave(domain_name='.x.com')
-    cookies = []
+
+    cookies = {}
     for c in cj:
-        if c.name in ('auth_token', 'ct0', 'twid'):
-            # MCP server expects .twitter.com domain
-            cookies.append(f"{c.name}={c.value}; Domain=.twitter.com")
+        if c.name in ('auth_token', 'ct0'):
+            cookies[c.name] = c.value
 
-    if len(cookies) < 3:
-        raise SystemExit(
-            "Missing required Twitter cookies. Make sure you're logged into Twitter in Brave."
-        )
+    if 'auth_token' not in cookies or 'ct0' not in cookies:
+        print("Missing required Twitter cookies. Make sure you're logged into Twitter in Brave.", file=sys.stderr)
+        sys.exit(1)
 
-    return json.dumps(cookies)
+    return cookies
 
 
 if __name__ == "__main__":
-    print(get_twitter_cookies())
+    cookies = get_twitter_cookies()
+    # Output in format suitable for shell eval
+    print(f"TWITTER_CT0={cookies['ct0']}")
+    print(f"TWITTER_AUTH_TOKEN={cookies['auth_token']}")

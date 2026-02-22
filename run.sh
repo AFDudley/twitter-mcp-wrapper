@@ -3,7 +3,9 @@ set -e
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 
-export TWITTER_COOKIES=$("$DIR/venv/bin/python" "$DIR/extract_cookies.py")
-export AUTH_METHOD=cookies
+# Extract cookies and export as environment variables
+eval "$("$DIR/venv/bin/python" "$DIR/extract_cookies.py")"
+export TWITTER_CT0
+export TWITTER_AUTH_TOKEN
 
-exec "$HOME/.nvm/nvm-exec" npx -y agent-twitter-client-mcp
+exec "$DIR/venv/bin/python" "$DIR/server.py"
